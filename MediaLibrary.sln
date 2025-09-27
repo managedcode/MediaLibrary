@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaLibrary", "MediaLibrary.csproj", "{024A46A3-82E7-4E03-AF39-96E24E04091A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{024A46A3-82E7-4E03-AF39-96E24E04091A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{024A46A3-82E7-4E03-AF39-96E24E04091A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{024A46A3-82E7-4E03-AF39-96E24E04091A}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{024A46A3-82E7-4E03-AF39-96E24E04091A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{024A46A3-82E7-4E03-AF39-96E24E04091A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {83C0725B-1546-4CAC-8D0A-D6F8ABA0B916}
+	EndGlobalSection
+EndGlobal
