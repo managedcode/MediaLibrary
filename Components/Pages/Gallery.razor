@@ -1,7 +1,25 @@
 ﻿@page "/gallery"
 
-<h3>Gallery</h3>
+<h3>Gallery @folderName</h3>
 
 @code {
 
+    [Inject]
+    IVirtualFileSystem storage { get; set; } = default!;
+
+    string? folderName;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var folderInfo = (await FolderPicker.Default.PickAsync()).Folder;
+
+        folderName = folderInfo?.Name;
+        var vfsPath = new VfsPath(folderInfo.Path);
+        var entries = new List<IVfsNode>();
+        await foreach (var entry in storage.ListAsync(vfsPath, new ListOptions { PageSize = 2 }))
+        {
+            entries.Add(entry);
+        }
+    }
 }
