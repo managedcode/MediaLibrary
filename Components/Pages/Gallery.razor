@@ -1,6 +1,42 @@
-﻿@page "/gallery"
+@page "/gallery"
+@using ManagedCode.Storage.FileSystem
+@using ManagedCode.Storage.FileSystem.Options
+@implements IAsyncDisposable
 
 <h3>Gallery @folderName</h3>
+
+<button @onclick="RefreshEntries" class="btn btn-primary mb-3">Оновити список</button>
+
+@if (entries == null)
+{
+    <p><em>Завантаження...</em></p>
+}
+else if (entries.Count == 0)
+{
+    <p><em>Немає файлів у цій папці</em></p>
+}
+else
+{
+    <div class="row">
+        @foreach (var entry in entries)
+        {
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@entry.Name</h5>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Тип: @GetEntryType(entry)<br/>
+                                Шлях: @entry.Path
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <p class="mt-3">Всього елементів: @entries.Count</p>
+}
 
 @code {
 
@@ -8,18 +44,75 @@
     IVirtualFileSystem storage { get; set; } = default!;
 
     string? folderName;
+    string? folderPath;
+    List<IVfsNode>? entries;
+    VirtualFileSystemTestContext? context;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadEntries();
+    }
 
-        var folderInfo = (await FolderPicker.Default.PickAsync()).Folder;
+    private async Task LoadEntries()
+    {
+        var folderInfo = await FolderPicker.Default.PickAsync();
 
-        folderName = folderInfo?.Name;
-        var vfsPath = new VfsPath(folderInfo.Path);
-        var entries = new List<IVfsNode>();
-        await foreach (var entry in storage.ListAsync(vfsPath, new ListOptions { PageSize = 2 }))
+        if (folderInfo?.Folder == null)
+            return;
+
+        folderName = folderInfo.Folder.Name;
+        folderPath = folderInfo.Folder.Path;
+
+        var options = new FileSystemStorageOptions
+        {
+            BaseFolder = folderPath,
+            CreateContainerIfNotExists = true
+        };
+
+        var storage = new FileSystemStorage(options);
+
+        //create context with base folder
+        context = await VirtualFileSystemTestContext.CreateAsync(
+            storage,
+            containerName: string.Empty,
+            ownsStorage: true,
+            serviceProvider: null,
+            cleanup: null);
+
+        var vfsPath = new VfsPath("/"); // Root of the selected folder, becase this is a root of VFS
+        entries = new List<IVfsNode>();
+        await foreach (var entry in context.FileSystem.ListAsync(vfsPath, new ListOptions { PageSize = 100 }))
         {
             entries.Add(entry);
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task RefreshEntries()
+    {
+        if (context != null && !string.IsNullOrEmpty(folderPath))
+        {
+            var vfsPath = new VfsPath("/");
+            entries = new List<IVfsNode>();
+            await foreach (var entry in context.FileSystem.ListAsync(vfsPath, new ListOptions { PageSize = 100 }))
+            {
+                entries.Add(entry);
+            }
+            StateHasChanged();
+        }
+    }
+
+    private string GetEntryType(IVfsNode entry)
+    {
+        return entry.GetType().Name.Contains("Directory") ? "Папка" : "Файл";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (context != null)
+        {
+            await context.DisposeAsync();
         }
     }
 }
